@@ -1,7 +1,11 @@
 export const BASE_URL =
-  location.hostname === "localhost" ? "http://localhost:8000" : "/api";
+  import.meta.env.VITE_BASE_URL ||
+  (location.hostname === "localhost"
+    ? "http://localhost:8000"
+    : "https://dev-connect-back-end-hwsp.vercel.app");
 
 export const SOCKET_URL =
-  location.hostname === "localhost"
+  import.meta.env.VITE_SOCKET_URL ||
+  (location.hostname === "localhost"
     ? "http://localhost:8000"
-    : `${location.protocol}//${location.hostname}:8000`;
+    : "https://dev-connect-back-end-hwsp.vercel.app");
