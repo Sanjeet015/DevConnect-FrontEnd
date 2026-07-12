@@ -7,6 +7,7 @@ import { BASE_URL } from "../utils/constants";
 import { HiOutlineCodeBracket } from "react-icons/hi2";
 import { FiMail, FiLock, FiUser, FiArrowRight, FiCheckCircle, FiShield, FiLock as FiKey } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const [emailId, setEmailId] = useState("");
@@ -19,6 +20,29 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${BASE_URL}/google-login`,
+        { token: credentialResponse.credential },
+        { withCredentials: true }
+      );
+      toast.success("Welcome to DevConnect!");
+      dispatch(addUser(res.data?.data || res.data));
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data || "Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google Sign-In failed. Please try again.");
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -353,6 +377,27 @@ const Login = () => {
                   Resend Code
                 </button>
               </form>
+            )}
+
+            {(view === "login" || view === "signup") && (
+              <>
+                <div className="flex items-center my-4">
+                  <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
+                  <span className="px-3 text-[10px] font-bold text-slate-400 dark:text-zinc-555 uppercase tracking-wider">or sign in with</span>
+                  <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
+                </div>
+                
+                <div className="flex justify-center w-full">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    theme="filled_blue"
+                    shape="pill"
+                    text="continue_with"
+                    width="250"
+                  />
+                </div>
+              </>
             )}
           </div>
 
