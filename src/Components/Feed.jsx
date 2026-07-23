@@ -20,7 +20,6 @@ const Feed = () => {
       if (showToastAlert) toast.success("Refreshed matching queue!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load developers feed");
     } finally {
       setLoading(false);
     }
