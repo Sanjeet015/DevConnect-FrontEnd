@@ -170,7 +170,7 @@ const Login = () => {
             </h3>
             <p className="text-sm font-semibold text-slate-400 dark:text-zinc-400">
               {view === "login" && "Sign in to your account."}
-              {view === "signup" && "Fill out inputs to configure your profile"}
+              {view === "signup" && "Complete your profile to get started."}
               {view === "forgot" && "We'll send recovery credentials to your inbox"}
               {view === "verify" && "Enter the verification OTP we sent you"}
             </p>
@@ -224,7 +224,7 @@ const Login = () => {
                   disabled={loading}
                   className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-slate-200 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed"
                 >
-                  <span>{loading ? "Processing..." : "Access Console"}</span>
+                  <span>{loading ? "Processing..." : "Sign in"}</span>
                   {!loading && <FiArrowRight />}
                 </button>
               </form>
@@ -241,7 +241,7 @@ const Login = () => {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Jane"
+                        placeholder="First Name"
                         required
                         className="w-full bg-slate-50/50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-955 transition-all glow-ring text-slate-800 dark:text-zinc-100"
                       />
@@ -256,7 +256,7 @@ const Login = () => {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Doe"
+                        placeholder="Last Name"
                         required
                         className="w-full bg-slate-50/50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-955 transition-all glow-ring text-slate-800 dark:text-zinc-100"
                       />
@@ -265,14 +265,14 @@ const Login = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Work Email</label>
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Email</label>
                   <div className="relative">
                     <FiMail className="absolute left-3.5 top-3.5 text-slate-400" size={14} />
                     <input
                       type="email"
                       value={emailId}
                       onChange={(e) => setEmailId(e.target.value)}
-                      placeholder="jane.doe@devconnect.com"
+                      placeholder="email address"
                       required
                       className="w-full bg-slate-50/50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-955 transition-all glow-ring text-slate-800 dark:text-zinc-100"
                     />
@@ -308,14 +308,14 @@ const Login = () => {
             {view === "forgot" && (
               <form onSubmit={handleMockForgotSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Work Email Address</label>
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Email Address</label>
                   <div className="relative">
                     <FiMail className="absolute left-3.5 top-3.5 text-slate-400" size={14} />
                     <input
                       type="email"
                       value={emailId}
                       onChange={(e) => setEmailId(e.target.value)}
-                      placeholder="jane.doe@devconnect.com"
+                      placeholder="email address"
                       required
                       className="w-full bg-slate-50/50 dark:bg-zinc-955 border border-slate-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-955 transition-all glow-ring text-slate-800 dark:text-zinc-100"
                     />
@@ -408,7 +408,7 @@ const Login = () => {
                 onClick={() => setView(view === "login" ? "signup" : "login")}
                 className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline cursor-pointer font-bold ml-1 transition"
               >
-                {view === "login" ? "Create Workspace" : "Log in"}
+                {view === "login" ? "Sign up" : "Log in"}
               </button>
             </p>
           )}
