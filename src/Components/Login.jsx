@@ -163,16 +163,16 @@ const Login = () => {
             </div>
             
             <h3 className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight">
-              {view === "login" && "Sign in to workspace"}
+              {view === "login" && "Sign in to DevConnect"}
               {view === "signup" && "Create developer account"}
               {view === "forgot" && "Reset your password"}
               {view === "verify" && "Verify your email"}
             </h3>
             <p className="text-sm font-semibold text-slate-400 dark:text-zinc-400">
-              {view === "login" && "Enter credentials to access your console"}
+              {view === "login" && "Sign in to your account."}
               {view === "signup" && "Fill out inputs to configure your profile"}
               {view === "forgot" && "We'll send recovery credentials to your inbox"}
-              {view === "verify" && "Enter the verification pin code we sent you"}
+              {view === "verify" && "Enter the verification OTP we sent you"}
             </p>
           </div>
 
@@ -181,14 +181,14 @@ const Login = () => {
             {view === "login" && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Work Email</label>
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase mb-1.5">Email</label>
                   <div className="relative">
                     <FiMail className="absolute left-3.5 top-3.5 text-slate-400" size={14} />
                     <input
                       type="email"
                       value={emailId}
                       onChange={(e) => setEmailId(e.target.value)}
-                      placeholder="jane.doe@devconnect.com"
+                      placeholder="email address"
                       required
                       className="w-full bg-slate-50/50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 transition-all glow-ring text-slate-800 dark:text-zinc-100"
                     />
@@ -197,7 +197,7 @@ const Login = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase">Console Password</label>
+                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase">Password</label>
                     <button
                       type="button"
                       onClick={() => setView("forgot")}
