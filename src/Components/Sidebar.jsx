@@ -56,6 +56,12 @@ function Sidebar() {
       }
     });
 
+    socket.on("receive_group_message", () => {
+      if (!window.location.pathname.startsWith("/messages")) {
+        setUnreadMessagesCount((prev) => prev + 1);
+      }
+    });
+
     socket.on("new_connection_request", () => {
       setPendingRequestsCount((prev) => prev + 1);
     });

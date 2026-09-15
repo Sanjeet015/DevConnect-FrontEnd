@@ -26,6 +26,42 @@ function Messages() {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const selectedChatRef = useRef(null);
+  selectedChatRef.current = selectedChat;
+
+  const isMessageMine = (msg) => {
+    if (!msg || !currentUser) return false;
+    const currentUserId = (currentUser._id || currentUser.id)?.toString();
+    if (!currentUserId) return false;
+
+    if (msg.isMine === true) return true;
+    if (msg.sender?.id && msg.sender.id.toString() === currentUserId) return true;
+    if (msg.sender?._id && msg.sender._id.toString() === currentUserId) return true;
+    if (msg.senderId) {
+      const sId = typeof msg.senderId === "object" ? (msg.senderId._id || msg.senderId.id) : msg.senderId;
+      if (sId && sId.toString() === currentUserId) return true;
+    }
+    return false;
+  };
+
+  const fetchConversations = async () => {
+    try {
+      setLoadingChats(true);
+      const res = await axios.get(`${BASE_URL}/chat/conversations`, { withCredentials: true });
+      const fetchedConversations = res.data?.data || [];
+      setConversations(fetchedConversations);
+      
+      const targetChatId = location.state?.autoSelectChatId;
+      if (!targetChatId && !selectedChatRef.current && fetchedConversations.length > 0) {
+        handleSelectChat(fetchedConversations[0]);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch conversations");
+    } finally {
+      setLoadingChats(false);
+    }
+  };
 
   useEffect(() => {
     if (!currentUser) return;
@@ -39,6 +75,9 @@ function Messages() {
 
     socket.on("connect", () => {
       console.log("Connected to messaging socket server");
+      if (selectedChatRef.current) {
+        socket.emit("join_room", selectedChatRef.current.chatId.toString());
+      }
     });
 
     socket.on("status_change", (data) => {
@@ -54,57 +93,79 @@ function Messages() {
       });
     });
 
+    socket.on("online_users", (userIds) => {
+      setOnlineUserIds(new Set(userIds));
+    });
+
     socket.on("receive_message", (message) => {
-      setSelectedChat((currentChat) => {
-        if (currentChat && !currentChat.isGroup && currentChat.chatId === message.chatId) {
-          setMessages((prev) => {
-            if (prev.some((msg) => msg.id === message.id)) return prev;
-            return [...prev, message];
-          });
-          axios.patch(`${BASE_URL}/chat/messages/${currentChat.chatId}/seen`, {}, { withCredentials: true })
-            .catch(err => console.error("Error setting seen:", err));
-        } else {
-          setConversations((prevChats) =>
-            prevChats.map((chat) => {
-              if (chat.chatId === message.chatId) {
-                return {
-                  ...chat,
-                  unreadCount: (chat.unreadCount || 0) + 1,
-                  lastMessage: message.text,
-                  updatedAt: message.createdAt,
-                };
-              }
-              return chat;
-            })
-          );
+      if (!message || !message.chatId) return;
+      const currentChat = selectedChatRef.current;
+      const msgChatId = message.chatId.toString();
+      const isCurrentlyOpen = currentChat && !currentChat.isGroup && currentChat.chatId.toString() === msgChatId;
+
+      if (isCurrentlyOpen) {
+        setMessages((prev) => {
+          const msgId = message.id || message._id;
+          if (prev.some((msg) => (msg.id || msg._id) === msgId)) return prev;
+          return [...prev, message];
+        });
+        axios.patch(`${BASE_URL}/chat/messages/${msgChatId}/seen`, {}, { withCredentials: true })
+          .catch((err) => console.error("Error setting seen:", err));
+      }
+
+      setConversations((prevChats) => {
+        const exists = prevChats.some((chat) => chat.chatId.toString() === msgChatId);
+        if (!exists) {
+          fetchConversations();
+          return prevChats;
         }
-        return currentChat;
+        const updated = prevChats.map((chat) => {
+          if (chat.chatId.toString() === msgChatId) {
+            return {
+              ...chat,
+              unreadCount: isCurrentlyOpen ? 0 : (chat.unreadCount || 0) + 1,
+              lastMessage: message.text,
+              updatedAt: message.createdAt || new Date().toISOString(),
+            };
+          }
+          return chat;
+        });
+        return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       });
     });
 
     socket.on("receive_group_message", (message) => {
-      setSelectedChat((currentChat) => {
-        if (currentChat && currentChat.isGroup && currentChat.chatId === message.chatId) {
-          setMessages((prev) => {
-            if (prev.some((msg) => msg.id === message.id)) return prev;
-            return [...prev, message];
-          });
-        } else {
-          setConversations((prevChats) =>
-            prevChats.map((chat) => {
-              if (chat.chatId === message.chatId) {
-                return {
-                  ...chat,
-                  unreadCount: (chat.unreadCount || 0) + 1,
-                  lastMessage: message.text,
-                  updatedAt: message.createdAt,
-                };
-              }
-              return chat;
-            })
-          );
+      if (!message || !message.chatId) return;
+      const currentChat = selectedChatRef.current;
+      const msgChatId = message.chatId.toString();
+      const isCurrentlyOpen = currentChat && currentChat.isGroup && currentChat.chatId.toString() === msgChatId;
+
+      if (isCurrentlyOpen) {
+        setMessages((prev) => {
+          const msgId = message.id || message._id;
+          if (prev.some((msg) => (msg.id || msg._id) === msgId)) return prev;
+          return [...prev, message];
+        });
+      }
+
+      setConversations((prevChats) => {
+        const exists = prevChats.some((chat) => chat.chatId.toString() === msgChatId);
+        if (!exists) {
+          fetchConversations();
+          return prevChats;
         }
-        return currentChat;
+        const updated = prevChats.map((chat) => {
+          if (chat.chatId.toString() === msgChatId) {
+            return {
+              ...chat,
+              unreadCount: isCurrentlyOpen ? 0 : (chat.unreadCount || 0) + 1,
+              lastMessage: message.text,
+              updatedAt: message.createdAt || new Date().toISOString(),
+            };
+          }
+          return chat;
+        });
+        return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       });
     });
 
@@ -125,44 +186,15 @@ function Messages() {
     };
   }, [currentUser]);
 
-  const fetchConversations = async () => {
-    try {
-      setLoadingChats(true);
-      const res = await axios.get(`${BASE_URL}/chat/conversations`, { withCredentials: true });
-      setConversations(res.data?.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch conversations");
-    } finally {
-      setLoadingChats(false);
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      fetchConversations();
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    const targetChatId = location.state?.autoSelectChatId;
-    if (targetChatId && conversations.length > 0) {
-      const matchingChat = conversations.find(c => c.chatId === targetChatId);
-      if (matchingChat) {
-        handleSelectChat(matchingChat);
-        window.history.replaceState({}, document.title);
-      }
-    }
-  }, [location.state?.autoSelectChatId, conversations]);
-
   const handleSelectChat = async (chat) => {
+    if (!chat) return;
     setSelectedChat(chat);
     setMessages([]);
     setCurrentPage(1);
     setHasMoreMessages(false);
     
-    if (socketRef.current) {
-      socketRef.current.emit("join_room", chat.chatId);
+    if (socketRef.current && socketRef.current.connected) {
+      socketRef.current.emit("join_room", chat.chatId.toString());
     }
 
     try {
@@ -176,7 +208,7 @@ function Messages() {
       setHasMoreMessages(res.data?.pagination?.hasMore || false);
       
       setConversations((prev) =>
-        prev.map((c) => (c.chatId === chat.chatId ? { ...c, unreadCount: 0 } : c))
+        prev.map((c) => (c.chatId.toString() === chat.chatId.toString() ? { ...c, unreadCount: 0 } : c))
       );
 
       if (!chat.isGroup) {
@@ -189,6 +221,29 @@ function Messages() {
       setLoadingMessages(false);
     }
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchConversations();
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (selectedChat && socketRef.current && socketRef.current.connected) {
+      socketRef.current.emit("join_room", selectedChat.chatId.toString());
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    const targetChatId = location.state?.autoSelectChatId;
+    if (targetChatId && conversations.length > 0) {
+      const matchingChat = conversations.find(c => c.chatId.toString() === targetChatId.toString());
+      if (matchingChat) {
+        handleSelectChat(matchingChat);
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state?.autoSelectChatId, conversations]);
 
   const handleLoadMore = async () => {
     if (!selectedChat || loadingMore) return;
@@ -225,7 +280,7 @@ function Messages() {
 
     if (!selectedChat.isGroup && socketRef.current) {
       socketRef.current.emit("typing_stop", {
-        roomId: selectedChat.chatId,
+        roomId: selectedChat.chatId.toString(),
         userName: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "",
       });
     }
@@ -244,17 +299,19 @@ function Messages() {
       const sentMessage = res.data?.data;
       if (sentMessage) {
         setMessages((prev) => {
-          if (prev.some((m) => m.id === sentMessage.id)) return prev;
+          const sId = sentMessage.id || sentMessage._id;
+          if (prev.some((m) => (m.id || m._id) === sId)) return prev;
           return [...prev, sentMessage];
         });
         
-        setConversations((prev) =>
-          prev.map((c) =>
-            c.chatId === selectedChat.chatId
-              ? { ...c, lastMessage: messageText, updatedAt: new Date().toISOString() }
+        setConversations((prev) => {
+          const updated = prev.map((c) =>
+            c.chatId.toString() === selectedChat.chatId.toString()
+              ? { ...c, lastMessage: messageText, updatedAt: sentMessage.createdAt || new Date().toISOString() }
               : c
-          )
-        );
+          );
+          return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        });
       }
     } catch (err) {
       console.error(err);
@@ -267,14 +324,14 @@ function Messages() {
     if (!selectedChat || selectedChat.isGroup || !socketRef.current) return;
 
     socketRef.current.emit("typing_start", {
-      roomId: selectedChat.chatId,
+      roomId: selectedChat.chatId.toString(),
       userName: currentUser?.firstName || "",
     });
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       socketRef.current.emit("typing_stop", {
-        roomId: selectedChat.chatId,
+        roomId: selectedChat.chatId.toString(),
         userName: currentUser?.firstName || "",
       });
     }, 2000);
@@ -315,7 +372,7 @@ function Messages() {
             </div>
           ) : (
             conversations.map((chat) => {
-              const isPartnerOnline = !chat.isGroup && onlineUserIds.has(chat.user._id);
+              const isPartnerOnline = !chat.isGroup && chat.user?._id && onlineUserIds.has(chat.user._id.toString());
               const isSelected = selectedChat?.chatId === chat.chatId;
 
               return (
@@ -396,10 +453,10 @@ function Messages() {
                     alt={selectedChat.user.firstName}
                     className="w-10 h-10 rounded-full object-cover border dark:border-zinc-800"
                   />
-                  {!selectedChat.isGroup && (
+                  {!selectedChat.isGroup && selectedChat.user?._id && (
                     <span
                       className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 ${
-                        onlineUserIds.has(selectedChat.user._id) ? "bg-emerald-500" : "bg-slate-350 dark:bg-zinc-700"
+                        onlineUserIds.has(selectedChat.user._id.toString()) ? "bg-emerald-500" : "bg-slate-350 dark:bg-zinc-700"
                       }`}
                     ></span>
                   )}
@@ -410,7 +467,7 @@ function Messages() {
                     {getPartnerName(selectedChat)}
                   </h3>
                   <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-550">
-                    {selectedChat.isGroup ? "Group Workspace Chat" : onlineUserIds.has(selectedChat.user._id) ? "Active now" : "Offline"}
+                    {selectedChat.isGroup ? "Group Workspace Chat" : (selectedChat.user?._id && onlineUserIds.has(selectedChat.user._id.toString())) ? "Active now" : "Offline"}
                   </p>
                 </div>
               </div>
@@ -438,7 +495,7 @@ function Messages() {
                     </div>
                   )}
                   {messages.map((msg, index) => {
-                    const isMine = msg.isMine || msg.sender?.id === currentUser?._id || msg.sender?._id === currentUser?._id || msg.senderId === currentUser?._id;
+                    const isMine = isMessageMine(msg);
                     return (
                       <div
                         key={msg.id || index}

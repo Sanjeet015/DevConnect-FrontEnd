@@ -60,14 +60,21 @@ const GroupWorkspace = () => {
     });
     socketRef.current = socket;
 
+    if (socket.connected) {
+      socket.emit("join_room", groupId.toString());
+    }
+
     socket.on("connect", () => {
       console.log("Joined socket group room:", groupId);
-      socket.emit("join_room", groupId);
+      socket.emit("join_room", groupId.toString());
     });
 
     socket.on("receive_group_message", (msg) => {
+      if (!msg) return;
+      if (msg.chatId && msg.chatId.toString() !== groupId.toString()) return;
+      const msgId = msg.id || msg._id;
       setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
+        if (prev.some((m) => (m.id || m._id) === msgId)) return prev;
         return [...prev, msg];
       });
       setTimeout(() => {
@@ -78,7 +85,7 @@ const GroupWorkspace = () => {
     });
 
     return () => {
-      socket.emit("leave_room", groupId);
+      socket.emit("leave_room", groupId.toString());
       socket.disconnect();
     };
   }, [groupId]);
