@@ -60,7 +60,7 @@ const Profile = ({ viewedUser = null, isReadOnly = false }) => {
             />
           </div>
 
-          <h1 className="mt-5 text-3xl font-black text-slate-800 dark:text-zinc-150 tracking-tight">
+          <h1 className="mt-5 text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight">
             {user.firstName} {user.lastName}
           </h1>
 
@@ -100,7 +100,7 @@ const Profile = ({ viewedUser = null, isReadOnly = false }) => {
               {user.skills.map((skill, index) => (
                 <span
                   key={index}
-                  className="px-3.5 py-1.5 bg-slate-50 dark:bg-zinc-850 border border-slate-200/60 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 rounded-xl text-xs font-bold shadow-xs hover:border-indigo-500/20 transition-colors"
+                  className="px-3.5 py-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-bold shadow-xs hover:border-indigo-500/20 transition-colors"
                 >
                   {skill}
                 </span>

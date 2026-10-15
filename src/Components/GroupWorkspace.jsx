@@ -338,8 +338,8 @@ const GroupWorkspace = () => {
 
       {confirmationModal && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center z-[90] p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-805 animate-scale-up">
-            <h3 className="text-lg font-bold text-[#091e42] dark:text-zinc-200 mb-2">{confirmationModal.title}</h3>
+          <div className="bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-800 animate-scale-up">
+            <h3 className="text-lg font-bold text-[#091e42] dark:text-zinc-100 mb-2">{confirmationModal.title}</h3>
             <p className="text-slate-555 dark:text-zinc-400 text-xs leading-relaxed mb-6 font-medium">{confirmationModal.message}</p>
             <div className="flex justify-end gap-3">
               <button
@@ -367,7 +367,7 @@ const GroupWorkspace = () => {
         
         <button 
           onClick={() => navigate("/groups")} 
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-555 hover:text-indigo-600 dark:text-zinc-450 dark:hover:text-indigo-400 transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-555 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 transition cursor-pointer"
         >
           <FiArrowLeft size={14} />
           <span>Back to Groups</span>
@@ -376,7 +376,7 @@ const GroupWorkspace = () => {
         <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800/80 rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#091e42] dark:text-zinc-155 tracking-tight">{groupData?.name || "Group Workspace"}</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#091e42] dark:text-zinc-100 tracking-tight">{groupData?.name || "Group Workspace"}</h1>
               <span className="inline-block mt-2 text-[10px] bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-md font-bold tracking-wide uppercase">
                 {groupMembers.length} {groupMembers.length === 1 ? "Active Member" : "Active Members"}
               </span>
@@ -547,7 +547,7 @@ const GroupWorkspace = () => {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type a message to the group..."
-                  className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 transition-all text-slate-800 dark:text-zinc-250 placeholder-slate-400 dark:placeholder-zinc-555"
+                  className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 transition-all text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500"
                 />
                 <button
                   type="submit"
@@ -563,7 +563,7 @@ const GroupWorkspace = () => {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800/80 rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] space-y-6">
-          <h2 className="text-lg font-bold text-[#091e42] dark:text-zinc-200 tracking-tight flex items-center gap-2">
+          <h2 className="text-lg font-bold text-[#091e42] dark:text-zinc-100 tracking-tight flex items-center gap-2">
             <FiShield className="text-indigo-600 dark:text-indigo-400" />
             Group Workspace Management
           </h2>

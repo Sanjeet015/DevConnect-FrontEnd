@@ -109,11 +109,11 @@ const Connections = () => {
         {/* Header Title Block */}
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-150 flex items-center gap-2">
+            <h2 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-100 flex items-center gap-2">
               <FiUsers className="text-indigo-500" />
               Your Network
             </h2>
-            <p className="text-[#62718b] dark:text-zinc-450 font-medium mt-1">
+            <p className="text-[#62718b] dark:text-zinc-400 font-medium mt-1">
               {connectionsList.length} {connectionsList.length === 1 ? "developer" : "developers"} in your professional network
             </p>
           </div>
@@ -192,7 +192,7 @@ const Connections = () => {
                   <div className="flex flex-wrap gap-1.5 mb-6">
                     {dev.skills?.length > 0 ? (
                       dev.skills.map((skill, index) => (
-                        <span key={index} className="bg-[#edf2f7] dark:bg-zinc-850 text-[#4a5568] dark:text-zinc-300 text-[10px] font-bold px-2.5 py-0.5 rounded-md">
+                        <span key={index} className="bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 border border-slate-200/60 dark:border-zinc-700 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors">
                           {skill}
                         </span>
                       ))

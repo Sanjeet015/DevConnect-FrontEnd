@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,8 +11,10 @@ import Sidebar from "./Sidebar";
 function Body() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector((store) => store.user);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const isMessagesRoute = location.pathname.startsWith("/messages");
 
   const fetchUser = async () => {
     try {

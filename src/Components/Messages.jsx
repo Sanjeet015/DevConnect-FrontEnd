@@ -3,13 +3,15 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { BASE_URL, SOCKET_URL } from "../utils/constants";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FiSend, FiChevronLeft, FiMessageSquare } from "react-icons/fi";
 import toast from "react-hot-toast";
 
 function Messages() {
   const currentUser = useSelector((store) => store.user);
   const location = useLocation();
+  const navigate = useNavigate();
+  const autoSelectedChatIdRef = useRef(null);
   
   const [conversations, setConversations] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -24,10 +26,26 @@ function Messages() {
   const [onlineUserIds, setOnlineUserIds] = useState(new Set());
 
   const socketRef = useRef(null);
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const selectedChatRef = useRef(null);
   selectedChatRef.current = selectedChat;
+
+  const scrollToBottom = (behavior = "smooth") => {
+    if (!chatContainerRef.current) return;
+    if (behavior === "auto") {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    } else {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const isMessageMine = (msg) => {
     if (!msg || !currentUser) return false;
@@ -111,6 +129,7 @@ function Messages() {
         });
         axios.patch(`${BASE_URL}/chat/messages/${msgChatId}/seen`, {}, { withCredentials: true })
           .catch((err) => console.error("Error setting seen:", err));
+        setTimeout(() => scrollToBottom("smooth"), 50);
       }
 
       setConversations((prevChats) => {
@@ -146,6 +165,7 @@ function Messages() {
           if (prev.some((msg) => (msg.id || msg._id) === msgId)) return prev;
           return [...prev, message];
         });
+        setTimeout(() => scrollToBottom("smooth"), 50);
       }
 
       setConversations((prevChats) => {
@@ -188,6 +208,9 @@ function Messages() {
 
   const handleSelectChat = async (chat) => {
     if (!chat) return;
+    if (selectedChatRef.current && selectedChatRef.current.chatId.toString() === chat.chatId.toString()) {
+      return;
+    }
     setSelectedChat(chat);
     setMessages([]);
     setCurrentPage(1);
@@ -214,6 +237,10 @@ function Messages() {
       if (!chat.isGroup) {
         await axios.patch(`${BASE_URL}/chat/messages/${chat.chatId}/seen`, {}, { withCredentials: true });
       }
+
+      setTimeout(() => {
+        scrollToBottom("auto");
+      }, 50);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load chat history");
@@ -236,14 +263,15 @@ function Messages() {
 
   useEffect(() => {
     const targetChatId = location.state?.autoSelectChatId;
-    if (targetChatId && conversations.length > 0) {
+    if (targetChatId && conversations.length > 0 && autoSelectedChatIdRef.current !== targetChatId.toString()) {
       const matchingChat = conversations.find(c => c.chatId.toString() === targetChatId.toString());
       if (matchingChat) {
+        autoSelectedChatIdRef.current = targetChatId.toString();
         handleSelectChat(matchingChat);
-        window.history.replaceState({}, document.title);
+        navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state?.autoSelectChatId, conversations]);
+  }, [location.state?.autoSelectChatId, conversations, navigate, location.pathname]);
 
   const handleLoadMore = async () => {
     if (!selectedChat || loadingMore) return;
@@ -254,11 +282,20 @@ function Messages() {
         ? `${BASE_URL}/group/${selectedChat.chatId}/messages?limit=50&page=${nextPage}`
         : `${BASE_URL}/chat/messages/${selectedChat.chatId}?limit=50&page=${nextPage}`;
 
+      const container = chatContainerRef.current;
+      const prevScrollHeight = container ? container.scrollHeight : 0;
+
       const res = await axios.get(url, { withCredentials: true });
       const olderMessages = res.data?.data || [];
       setMessages((prev) => [...olderMessages, ...prev]);
       setCurrentPage(nextPage);
       setHasMoreMessages(res.data?.pagination?.hasMore || false);
+
+      setTimeout(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight - prevScrollHeight;
+        }
+      }, 0);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load earlier messages");
@@ -268,8 +305,10 @@ function Messages() {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers]);
+    if (selectedChat && typingUsers[selectedChat.chatId]) {
+      scrollToBottom("smooth");
+    }
+  }, [typingUsers, selectedChat]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -303,6 +342,7 @@ function Messages() {
           if (prev.some((m) => (m.id || m._id) === sId)) return prev;
           return [...prev, sentMessage];
         });
+        setTimeout(() => scrollToBottom("smooth"), 50);
         
         setConversations((prev) => {
           const updated = prev.map((c) =>
@@ -353,7 +393,7 @@ function Messages() {
         } w-full md:w-80 lg:w-96 border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-col h-full shrink-0`}
       >
         <div className="p-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-[#091e42] dark:text-zinc-150">Developer Chats</h1>
+          <h1 className="text-xl font-bold text-[#091e42] dark:text-zinc-100">Developer Chats</h1>
           <span className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-100/30 dark:border-indigo-900/20">
             {conversations.length} Active
           </span>
@@ -473,7 +513,7 @@ function Messages() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {loadingMessages ? (
                 <div className="h-full flex items-center justify-center">
                   <span className="loading loading-spinner text-indigo-600 dark:text-indigo-400"></span>
@@ -555,7 +595,6 @@ function Messages() {
                       </div>
                     </div>
                   )}
-                  <div ref={messagesEndRef} />
                 </>
               )}
             </div>
@@ -569,7 +608,7 @@ function Messages() {
                 value={newMessageText}
                 onChange={handleInputChange}
                 placeholder="Type a message to collaborate..."
-                className="flex-1 bg-[#f8fafc] dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 transition text-slate-800 dark:text-zinc-250"
+                className="flex-1 bg-[#f8fafc] dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 transition text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500"
               />
               <button
                 type="submit"

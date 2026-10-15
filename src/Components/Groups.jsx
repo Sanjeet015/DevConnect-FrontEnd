@@ -153,11 +153,11 @@ const Groups = () => {
       {}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#091e42] dark:text-zinc-150 tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#091e42] dark:text-zinc-100 tracking-tight flex items-center gap-2">
             <FiUsers className="text-indigo-600 dark:text-indigo-400" />
             Developer Groups
           </h1>
-          <p className="text-[#62718b] dark:text-zinc-450 font-medium text-sm sm:text-base mt-1">
+          <p className="text-[#62718b] dark:text-zinc-400 font-medium text-sm sm:text-base mt-1">
             Build, collaborate, and chat in private developer communities.
           </p>
         </div>
@@ -243,7 +243,7 @@ const Groups = () => {
                   <button 
                     onClick={() => setLeaveTarget({ _id: group._id, name: group.name })}
                     title="Leave Group"
-                    className="p-3 text-slate-550 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-455 bg-slate-55 dark:bg-zinc-850 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-slate-200 dark:border-zinc-800 hover:border-rose-100 dark:hover:border-rose-900/30 rounded-xl transition duration-200 cursor-pointer"
+                    className="p-3 text-slate-550 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 bg-slate-55 dark:bg-zinc-850 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-slate-200 dark:border-zinc-800 hover:border-rose-100 dark:hover:border-rose-900/30 rounded-xl transition duration-200 cursor-pointer"
                   >
                     <FiLogOut size={16} />
                   </button>
@@ -294,7 +294,7 @@ const Groups = () => {
                   value={newGroupData.name} 
                   onChange={(e) => setNewGroupData({ ...newGroupData, name: e.target.value })} 
                   placeholder="e.g. Tailwind Wizards, Rust Core Network" 
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 outline-none text-xs font-semibold focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-800 dark:text-zinc-250 placeholder-slate-400 dark:placeholder-zinc-600 transition-all" 
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 outline-none text-xs font-semibold focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 transition-all" 
                 />
               </div>
               <div>
@@ -304,7 +304,7 @@ const Groups = () => {
                   onChange={(e) => setNewGroupData({ ...newGroupData, description: e.target.value })} 
                   placeholder="What is this workspace focused on?" 
                   rows={4} 
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 outline-none text-xs font-semibold focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-800 dark:text-zinc-250 placeholder-slate-400 dark:placeholder-zinc-600 transition-all resize-none" 
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 outline-none text-xs font-semibold focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 transition-all resize-none" 
                 />
               </div>
             </div>
@@ -332,9 +332,9 @@ const Groups = () => {
       {leaveTarget && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-800/80 overflow-hidden animate-scale-up">
-            <h3 className="text-lg font-bold text-[#091e42] dark:text-zinc-200 mb-2">Leave Group</h3>
+            <h3 className="text-lg font-bold text-[#091e42] dark:text-zinc-100 mb-2">Leave Group</h3>
             <p className="text-slate-550 dark:text-zinc-400 text-xs leading-relaxed mb-6">
-              Are you sure you want to leave <span className="font-bold text-[#091e42] dark:text-zinc-150">{leaveTarget.name}</span>? You will need to be re-invited by a group admin to rejoin.
+              Are you sure you want to leave <span className="font-bold text-slate-900 dark:text-zinc-100">{leaveTarget.name}</span>? You will need to be re-invited by a group admin to rejoin.
             </p>
             <div className="flex justify-end gap-3">
               <button 
@@ -360,9 +360,9 @@ const Groups = () => {
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-800/80 overflow-hidden animate-scale-up">
-            <h3 className="text-lg font-bold text-rose-600 dark:text-rose-450 mb-2">Delete Group</h3>
+            <h3 className="text-lg font-bold text-rose-600 dark:text-rose-400 mb-2">Delete Group</h3>
             <p className="text-slate-550 dark:text-zinc-400 text-xs leading-relaxed mb-6 font-medium">
-              Are you absolutely sure you want to delete <span className="font-bold text-[#091e42] dark:text-zinc-150">{deleteTarget.name}</span>? This action is permanent and cannot be undone. All workspace records and rosters will be deleted.
+              Are you absolutely sure you want to delete <span className="font-bold text-slate-900 dark:text-zinc-100">{deleteTarget.name}</span>? This action is permanent and cannot be undone. All workspace records and rosters will be deleted.
             </p>
             <div className="flex justify-end gap-3">
               <button 
@@ -388,7 +388,7 @@ const Groups = () => {
       {errorModalMessage && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center z-[70] p-4">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-200 dark:border-zinc-850/80 animate-scale-up">
-            <h3 className="text-base font-bold text-rose-600 dark:text-rose-450 mb-2 flex items-center gap-1.5">
+            <h3 className="text-base font-bold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-1.5">
               <FiInfo />
               Operation Error
             </h3>
@@ -396,7 +396,7 @@ const Groups = () => {
             <div className="flex justify-end mt-5">
               <button 
                 onClick={() => setErrorModalMessage(null)}
-                className="px-4 py-2 bg-slate-900 dark:bg-zinc-800 text-white dark:text-zinc-150 rounded-xl text-xs font-bold cursor-pointer"
+                className="px-4 py-2 bg-slate-900 dark:bg-zinc-800 text-white dark:text-zinc-100 rounded-xl text-xs font-bold cursor-pointer"
               >
                 Dismiss
               </button>

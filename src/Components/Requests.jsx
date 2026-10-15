@@ -90,8 +90,8 @@ const Requests = () => {
     <div className="w-full max-w-5xl mx-auto px-4 py-8 bg-[#f8fafc] dark:bg-zinc-950 min-h-screen transition-colors">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-150">Connection requests</h2>
-          <p className="text-[#62718b] dark:text-zinc-450 font-medium mt-1">
+          <h2 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-100">Connection requests</h2>
+          <p className="text-[#62718b] dark:text-zinc-400 font-medium mt-1">
             {requestList.length} pending requests
           </p>
         </div>

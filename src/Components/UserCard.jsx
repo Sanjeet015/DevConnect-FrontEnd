@@ -209,7 +209,7 @@ function UserCard({ user }) {
                       {user.skills.map((skill) => (
                         <span
                           key={skill}
-                          className="px-3 py-1 text-[11px] font-bold rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-indigo-500/30 hover:bg-indigo-50/10 transition-all cursor-default"
+                          className="px-3 py-1 text-[11px] font-bold rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-indigo-500/30 transition-all cursor-default"
                         >
                           {skill}
                         </span>

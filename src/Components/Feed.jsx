@@ -66,7 +66,7 @@ const Feed = () => {
             <FiCompass size={32} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-zinc-150">You've Seen Everyone!</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-zinc-100">You've Seen Everyone!</h3>
             <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1.5 leading-relaxed font-semibold max-w-xs mx-auto">
               Match requests sent successfully. Check back later for new developer profiles or refresh the feed.
             </p>

@@ -250,8 +250,8 @@ const Setting = () => {
       {}
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-150 tracking-tight">Console Settings</h1>
-          <p className="text-[#62718b] dark:text-zinc-450 font-medium text-sm mt-1">Configure your developer profile and security tokens.</p>
+          <h1 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-100 tracking-tight">Console Settings</h1>
+          <p className="text-[#62718b] dark:text-zinc-400 font-medium text-sm mt-1">Configure your developer profile and security tokens.</p>
         </div>
       </div>
 
@@ -359,7 +359,7 @@ const Setting = () => {
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold text-slate-655 dark:text-zinc-400 uppercase mb-2">Skills & Technologies</label>
                   <div className="flex gap-2">
-                    <input type="text" value={skillInput} placeholder="React, Node.js, GraphQL..." onChange={(e) => setSkillInput(e.target.value)} className="flex-1 bg-slate-50/30 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950" />
+                    <input type="text" value={skillInput} placeholder="React, Node.js, GraphQL..." onChange={(e) => setSkillInput(e.target.value)} className="flex-1 bg-slate-50/30 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 text-xs font-semibold outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-950 text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500" />
                     <button type="button" onClick={addSkill} className="px-5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer transition">Add</button>
                   </div>
                   {skills.length > 0 && (
@@ -418,10 +418,10 @@ const Setting = () => {
                     <div key={proj._id} className="border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-5 hover:shadow-md bg-white dark:bg-zinc-900/60 transition flex flex-col justify-between">
                       <div className="space-y-3">
                         <div className="flex justify-between items-start gap-2">
-                          <h4 className="text-base font-bold text-slate-800 dark:text-zinc-250 truncate">{proj.title}</h4>
+                          <h4 className="text-base font-bold text-slate-800 dark:text-zinc-100 truncate">{proj.title}</h4>
                           <div className="flex items-center gap-2 shrink-0 select-none">
                             <button onClick={() => openEditProjectModal(proj)} className="p-2 hover:bg-indigo-50 dark:hover:bg-zinc-800 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition cursor-pointer"><FiEdit3 size={14} /></button>
-                            <button onClick={() => setDeleteTargetId(proj._id)} className="p-2 hover:bg-rose-50 dark:hover:bg-zinc-800 text-slate-400 hover:text-rose-600 dark:hover:text-rose-455 rounded-xl transition cursor-pointer"><FiTrash2 size={14} /></button>
+                            <button onClick={() => setDeleteTargetId(proj._id)} className="p-2 hover:bg-rose-50 dark:hover:bg-zinc-800 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl transition cursor-pointer"><FiTrash2 size={14} /></button>
                           </div>
                         </div>
                         <p className="text-slate-500 dark:text-zinc-400 text-xs leading-relaxed line-clamp-3">{proj.description}</p>
@@ -482,7 +482,7 @@ const Setting = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl w-full max-w-xl p-6 border border-slate-100 dark:border-zinc-800 animate-scale-up max-h-[90vh] flex flex-col justify-between">
             <div>
-              <h3 className="text-xl font-extrabold text-[#091e42] dark:text-zinc-150 mb-1">{editingProjectId ? "Edit Project Details" : "Publish Project Portfolio"}</h3>
+              <h3 className="text-xl font-extrabold text-[#091e42] dark:text-zinc-100 mb-1">{editingProjectId ? "Edit Project Details" : "Publish Project Portfolio"}</h3>
               <p className="text-xs text-slate-400 dark:text-zinc-500">Add detailed references to showcase your engineering expertise.</p>
             </div>
 

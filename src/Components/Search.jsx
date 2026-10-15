@@ -107,13 +107,13 @@ const Search = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-[#f8fafc] min-h-screen">
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-[#f8fafc] dark:bg-zinc-950 min-h-screen transition-colors">
       <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-[#091e42] flex items-center gap-3">
+        <h2 className="text-3xl font-extrabold text-[#091e42] dark:text-zinc-100 flex items-center gap-3">
           <FiSearch size={28} className="text-[#0091ff]" />
           Search Results
         </h2>
-        <p className="text-[#62718b] font-medium mt-1">
+        <p className="text-[#62718b] dark:text-zinc-400 font-medium mt-1">
           {query.trim()
             ? `Found ${results.length} developer${results.length === 1 ? "" : "s"} for "${query}"`
             : "Enter a search term in the navigation bar to search developers."}
@@ -123,25 +123,25 @@ const Search = () => {
       {loading ? (
         <div className="w-full text-center py-20">
           <span className="loading loading-spinner text-[#0091ff] loading-lg"></span>
-          <p className="text-[#62718b] text-sm font-medium mt-4">Searching database...</p>
+          <p className="text-[#62718b] dark:text-zinc-400 text-sm font-medium mt-4">Searching database...</p>
         </div>
       ) : !query.trim() ? (
-        <div className="w-full text-center py-20 bg-white border border-[#edf2f7] rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.01)] p-8">
-          <div className="w-16 h-16 bg-blue-50 text-[#0091ff] rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-full text-center py-20 bg-white dark:bg-zinc-900 border border-[#edf2f7] dark:border-zinc-800 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.01)] p-8">
+          <div className="w-16 h-16 bg-blue-50 dark:bg-zinc-800 text-[#0091ff] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FiSearch size={28} />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">Search DevConnect</h3>
-          <p className="text-slate-500 text-sm mt-1 max-w-sm mx-auto leading-relaxed">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100">Search DevConnect</h3>
+          <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1 max-w-sm mx-auto leading-relaxed">
             Find developers by their first name, last name, or key tech skills (e.g. React, Node, Python).
           </p>
         </div>
       ) : results.length === 0 ? (
-        <div className="w-full text-center py-20 bg-white border border-[#edf2f7] rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.01)] p-8">
-          <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-full text-center py-20 bg-white dark:bg-zinc-900 border border-[#edf2f7] dark:border-zinc-800 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.01)] p-8">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FiSearch size={28} />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No results found</h3>
-          <p className="text-slate-500 text-sm mt-1 max-w-sm mx-auto leading-relaxed">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100">No results found</h3>
+          <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1 max-w-sm mx-auto leading-relaxed">
             We couldn't find any developers matching "{query}". Try checking the spelling or searching for another keyword.
           </p>
         </div>
@@ -150,20 +150,20 @@ const Search = () => {
           {results.map((dev) => (
             <div
               key={dev._id}
-              className="bg-white border border-[#edf2f7] rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between"
+              className="bg-white dark:bg-zinc-900 border border-[#edf2f7] dark:border-zinc-800 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center space-x-4 mb-5">
                   <img
                     src={dev.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"}
                     alt={`${dev.firstName} ${dev.lastName}`}
-                    className="w-16 h-16 rounded-full object-cover border border-slate-100 flex-shrink-0"
+                    className="w-16 h-16 rounded-full object-cover border border-slate-100 dark:border-zinc-800 flex-shrink-0"
                   />
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-bold text-[#091e42] truncate">
+                    <h3 className="text-lg font-bold text-[#091e42] dark:text-zinc-100 truncate">
                       {dev.firstName} {dev.lastName}
                     </h3>
-                    <p className="text-xs text-[#62718b] font-medium truncate mt-0.5">
+                    <p className="text-xs text-[#62718b] dark:text-zinc-400 font-medium truncate mt-0.5">
                       {dev.about || `${dev.age || "N/A"} years old • ${dev.gender || "Developer"}`}
                     </p>
                   </div>
@@ -206,7 +206,7 @@ const Search = () => {
                 <div className="flex flex-wrap gap-2 mb-6">
                   {dev.skills?.length > 0 ? (
                     dev.skills.map((skill, index) => (
-                      <span key={index} className="bg-[#edf2f7] text-[#4a5568] text-[10px] font-bold px-2.5 py-0.5 rounded-md">
+                      <span key={index} className="bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 border border-slate-200/60 dark:border-zinc-700 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors">
                         {skill}
                       </span>
                     ))
