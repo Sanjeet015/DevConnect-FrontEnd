@@ -10,6 +10,7 @@ const Connections = () => {
   const navigate = useNavigate();
   const [connectionsList, setConnectionsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [onlineUserIds, setOnlineUserIds] = useState(new Set());
 
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false); 
@@ -78,6 +79,13 @@ const Connections = () => {
 
   useEffect(() => {
     fetchConnection();
+    axios.get(`${BASE_URL}/chat/online-users`, { withCredentials: true })
+      .then((res) => {
+        if (Array.isArray(res.data?.data)) {
+          setOnlineUserIds(new Set(res.data.data.map((id) => id.toString())));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   
@@ -174,15 +182,30 @@ const Connections = () => {
               >
                 <div>
                   <div className="flex items-center space-x-4 mb-5">
-                    <img
-                      src={dev.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"}
-                      alt={`${dev.firstName} ${dev.lastName}`}
-                      className="w-16 h-16 rounded-full object-cover border border-slate-100 dark:border-zinc-850"
-                    />
+                    <div className="relative shrink-0">
+                      <img
+                        src={dev.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"}
+                        alt={`${dev.firstName} ${dev.lastName}`}
+                        className="w-16 h-16 rounded-full object-cover border border-slate-100 dark:border-zinc-850"
+                      />
+                      <span
+                        className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 transition-colors ${
+                          onlineUserIds.has(dev._id.toString()) ? "bg-emerald-500 ring-2 ring-emerald-500/20" : "bg-slate-350 dark:bg-zinc-700"
+                        }`}
+                        title={onlineUserIds.has(dev._id.toString()) ? "Online" : "Offline"}
+                      ></span>
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-bold text-[#091e42] dark:text-zinc-200 truncate">
-                        {dev.firstName} {dev.lastName}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-[#091e42] dark:text-zinc-200 truncate">
+                          {dev.firstName} {dev.lastName}
+                        </h3>
+                        {onlineUserIds.has(dev._id.toString()) && (
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/30">
+                            Online
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-[#62718b] dark:text-zinc-400 font-medium truncate mt-0.5">
                         {dev.about || `${dev.age || "N/A"} years old • ${dev.gender || "Developer"}`}
                       </p>

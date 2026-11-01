@@ -47,6 +47,13 @@ function Messages() {
     window.scrollTo(0, 0);
   }, []);
 
+  const isUserOnline = (user) => {
+    if (!user) return false;
+    const id = (user._id || user.id || (typeof user === "string" ? user : null))?.toString();
+    if (!id) return false;
+    return onlineUserIds.has(id);
+  };
+
   const isMessageMine = (msg) => {
     if (!msg || !currentUser) return false;
     const currentUserId = (currentUser._id || currentUser.id)?.toString();
@@ -69,6 +76,14 @@ function Messages() {
       const fetchedConversations = res.data?.data || [];
       setConversations(fetchedConversations);
       
+      const apiOnlineUsers = fetchedConversations
+        .filter((c) => !c.isGroup && (c.isOnline || c.user?.isOnline))
+        .map((c) => (c.user?._id || c.user?.id)?.toString())
+        .filter(Boolean);
+      if (apiOnlineUsers.length > 0) {
+        setOnlineUserIds((prev) => new Set([...prev, ...apiOnlineUsers]));
+      }
+
       const targetChatId = location.state?.autoSelectChatId;
       if (!targetChatId && !selectedChatRef.current && fetchedConversations.length > 0) {
         handleSelectChat(fetchedConversations[0]);
@@ -83,40 +98,72 @@ function Messages() {
 
   useEffect(() => {
     if (!currentUser) return;
+    axios.get(`${BASE_URL}/chat/online-users`, { withCredentials: true })
+      .then((res) => {
+        if (Array.isArray(res.data?.data)) {
+          setOnlineUserIds((prev) => new Set([...prev, ...res.data.data.map((id) => id.toString())]));
+        }
+      })
+      .catch(() => {});
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
 
     const socket = io(SOCKET_URL, {
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
     });
 
     socketRef.current = socket;
 
-    socket.on("connect", () => {
+    const handleConnected = () => {
       console.log("Connected to messaging socket server");
+      socket.emit("get_online_users");
       if (selectedChatRef.current) {
         socket.emit("join_room", selectedChatRef.current.chatId.toString());
+        if (!selectedChatRef.current.isGroup && selectedChatRef.current.user) {
+          const uid = (selectedChatRef.current.user._id || selectedChatRef.current.user.id)?.toString();
+          if (uid) socket.emit("check_user_status", uid);
+        }
       }
-    });
+    };
+
+    if (socket.connected) {
+      handleConnected();
+    } else {
+      socket.on("connect", handleConnected);
+    }
 
     socket.on("status_change", (data) => {
+      if (!data || !data.userId) return;
       const { userId, status } = data;
+      const idStr = userId.toString();
       setOnlineUserIds((prev) => {
         const next = new Set(prev);
         if (status === "online") {
-          next.add(userId);
+          next.add(idStr);
         } else {
-          next.delete(userId);
+          next.delete(idStr);
         }
         return next;
       });
     });
 
     socket.on("online_users", (userIds) => {
-      setOnlineUserIds(new Set(userIds));
+      if (Array.isArray(userIds)) {
+        setOnlineUserIds(new Set(userIds.map((id) => id.toString())));
+      }
     });
 
     socket.on("receive_message", (message) => {
       if (!message || !message.chatId) return;
+
+      const senderId = message.sender?.id || message.sender?._id || (typeof message.senderId === "object" ? message.senderId._id : message.senderId);
+      if (senderId) {
+        setOnlineUserIds((prev) => new Set([...prev, senderId.toString()]));
+      }
+
       const currentChat = selectedChatRef.current;
       const msgChatId = message.chatId.toString();
       const isCurrentlyOpen = currentChat && !currentChat.isGroup && currentChat.chatId.toString() === msgChatId;
@@ -190,7 +237,11 @@ function Messages() {
     });
 
     socket.on("typing_status", (data) => {
-      const { roomId, userName, isTyping } = data;
+      if (!data) return;
+      const { roomId, userName, isTyping, userId } = data;
+      if (userId && isTyping) {
+        setOnlineUserIds((prev) => new Set([...prev, userId.toString()]));
+      }
       setTypingUsers((prev) => ({
         ...prev,
         [roomId]: isTyping ? userName : null,
@@ -202,8 +253,19 @@ function Messages() {
     });
 
     return () => {
+      socket.off("connect", handleConnected);
       socket.disconnect();
     };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const interval = setInterval(() => {
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.emit("get_online_users");
+      }
+    }, 30000);
+    return () => clearInterval(interval);
   }, [currentUser]);
 
   const handleSelectChat = async (chat) => {
@@ -218,6 +280,10 @@ function Messages() {
     
     if (socketRef.current && socketRef.current.connected) {
       socketRef.current.emit("join_room", chat.chatId.toString());
+      if (!chat.isGroup && chat.user) {
+        const uid = (chat.user._id || chat.user.id)?.toString();
+        if (uid) socketRef.current.emit("check_user_status", uid);
+      }
     }
 
     try {
@@ -258,6 +324,10 @@ function Messages() {
   useEffect(() => {
     if (selectedChat && socketRef.current && socketRef.current.connected) {
       socketRef.current.emit("join_room", selectedChat.chatId.toString());
+      if (!selectedChat.isGroup && selectedChat.user) {
+        const uid = (selectedChat.user._id || selectedChat.user.id)?.toString();
+        if (uid) socketRef.current.emit("check_user_status", uid);
+      }
     }
   }, [selectedChat]);
 
@@ -412,7 +482,7 @@ function Messages() {
             </div>
           ) : (
             conversations.map((chat) => {
-              const isPartnerOnline = !chat.isGroup && chat.user?._id && onlineUserIds.has(chat.user._id.toString());
+              const partnerOnline = !chat.isGroup && isUserOnline(chat.user);
               const isSelected = selectedChat?.chatId === chat.chatId;
 
               return (
@@ -433,9 +503,10 @@ function Messages() {
                     />
                     {!chat.isGroup && (
                       <span
-                        className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 ${
-                          isPartnerOnline ? "bg-emerald-500" : "bg-slate-350 dark:bg-zinc-700"
+                        className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 transition-colors ${
+                          partnerOnline ? "bg-emerald-500 ring-2 ring-emerald-500/20" : "bg-slate-350 dark:bg-zinc-700"
                         }`}
+                        title={partnerOnline ? "Online" : "Offline"}
                       ></span>
                     )}
                   </div>
@@ -493,11 +564,12 @@ function Messages() {
                     alt={selectedChat.user.firstName}
                     className="w-10 h-10 rounded-full object-cover border dark:border-zinc-800"
                   />
-                  {!selectedChat.isGroup && selectedChat.user?._id && (
+                  {!selectedChat.isGroup && selectedChat.user && (
                     <span
-                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 ${
-                        onlineUserIds.has(selectedChat.user._id.toString()) ? "bg-emerald-500" : "bg-slate-350 dark:bg-zinc-700"
+                      className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 transition-colors ${
+                        isUserOnline(selectedChat.user) ? "bg-emerald-500 ring-2 ring-emerald-500/20" : "bg-slate-350 dark:bg-zinc-700"
                       }`}
+                      title={isUserOnline(selectedChat.user) ? "Online" : "Offline"}
                     ></span>
                   )}
                 </div>
@@ -506,8 +578,20 @@ function Messages() {
                   <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-200">
                     {getPartnerName(selectedChat)}
                   </h3>
-                  <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-550">
-                    {selectedChat.isGroup ? "Group Workspace Chat" : (selectedChat.user?._id && onlineUserIds.has(selectedChat.user._id.toString())) ? "Active now" : "Offline"}
+                  <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-550 flex items-center gap-1.5 mt-0.5">
+                    {selectedChat.isGroup ? (
+                      "Group Workspace Chat"
+                    ) : isUserOnline(selectedChat.user) ? (
+                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Active now
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-350 dark:bg-zinc-650"></span>
+                        Offline
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
